@@ -1,14 +1,42 @@
-import Head from "next/head";
+// import Head from "next/head";
+import { useState, useEffect } from "react";
+import { supabase } from "../client";
 
 export default function Home() {
+   // Declare a new state variable to store task details
+   const [task, setTask] = useState({
+    Name: "",
+    Activity: "",
+    StartDate: "",
+    EndDate: "",
+  });
+
+  const { Name, Activity, StartDate, EndDate } = task;
+
+  // Create a function that handles the new task creation
+  async function addTask() {
+    await supabase
+      .from("Task") // Select the Table
+      .insert([
+        {
+          Name,
+          Activity,
+          StartDate,
+          EndDate,
+        },
+      ]) // Insert the new task
+      .single();
+    setTask({
+      Name: "",
+      Activity: "",
+      StartDate: "",
+      EndDate: "",
+    }); // Reset the task details
+  }
   return (
     <div className="flex flex-col items-center justify-center py-2">
       <div>
-        <Head>
-          <title>Daily Tasks</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-
+       // ...
         <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
           <h1 className="text-4xl font-bold mt-20">
             <a className="text-blue-600" href="/">
@@ -31,6 +59,10 @@ export default function Home() {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       id="taskName"
                       type="text"
+                      value={Name.toString()}
+                      onChange={(e) =>
+                        setTask({ ...task, Name: e.target.value })
+                      }
                     />
                   </div>
                   <div className="mb-4">
@@ -45,6 +77,10 @@ export default function Home() {
                       className="form-textarea mt-1 block shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       rows="3"
                       placeholder="Task Activity"
+                      value={Activity.toString()}
+                      onChange={(e) =>
+                        setTask({ ...task, Activity: e.target.value })
+                      }
                     ></textarea>
                   </div>
 
@@ -59,6 +95,10 @@ export default function Home() {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       id="startDate"
                       type="date"
+                      value={StartDate.toString()}
+                      onChange={(e) =>
+                        setTask({ ...task, StartDate: e.target.value })
+                      }
                     />
                   </div>
                   <div className="mb-4">
@@ -72,12 +112,17 @@ export default function Home() {
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       id="endDate"
                       type="date"
+                      value={EndDate.toString()}
+                      onChange={(e) =>
+                        setTask({ ...task, EndDate: e.target.value })
+                      }
                     />
                   </div>
                   <div className="flex items-center justify-between">
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                       type="button"
+                      onClick={addTask} // Call the addTask Function
                     >
                       Add Task
                     </button>
@@ -87,47 +132,7 @@ export default function Home() {
             </div>
 
             <div className="p-2 mt-6 w-96 rounded-xl focus:text-blue-600">
-              <table className="shadow-lg bg-white">
-                <tbody>
-                  <tr>
-                    <th className="bg-blue-400 border text-left px-4 py-4">
-                      S/N
-                    </th>
-                    <th className="bg-blue-400 border text-left px-8 py-4">
-                      Name
-                    </th>
-                    <th className="bg-blue-400 border text-left px-8 py-4">
-                      Activity
-                    </th>
-                    <th className="bg-blue-400 border text-left px-14 py-4">
-                      Start Date
-                    </th>
-                    <th className="bg-blue-400 border text-left px-16 py-4">
-                      End Date
-                    </th>
-
-                    <th className="bg-blue-400 border text-left px-4 py-4">
-                      Action
-                    </th>
-                  </tr>
-                  <tr>
-                    <td className="border px-4 py-4"></td>
-                    <td className="border px-4 py-4"></td>
-                    <td className="border px-8 py-4"></td>
-                    <td className="border px-8 py-4"></td>
-                    <td className="border px-8 py-4"></td>
-                    <td className="border px-8 py-4">
-                      {" "}
-                      <button
-                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        type="button"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              // ...
             </div>
           </div>
         </main>
