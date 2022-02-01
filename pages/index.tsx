@@ -4,13 +4,22 @@ import { supabase } from "../client";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [tasks, setTasks] = useState([]);
-  const [task, setTask] = useState({
+  const [tasks, setTasks] = useState<Task[]>([]);
+  interface Task { 
+    id ?: number;
+    Name: string;
+    Activity: string;
+    StartDate: string;
+    EndDate: string;
+  }
+  
+
+  const [task, setTask] = useState<Task>({
     Name: "",
     Activity: "",
     StartDate: "",
     EndDate: "",
-  });
+  }); 
 
   const { Name, Activity, StartDate, EndDate } = task;
   async function addTask() {
@@ -35,13 +44,14 @@ export default function Home() {
   }
 
   async function getTasks() {
-    const { data } = await supabase.from("Task").select();
+    const response = await supabase.from("Task").select();
+    const data: Task[] = response.data || [];
     setTasks(data);
     setLoading(false);
   }
 
 
-  async function deleteTask(id) {
+  async function deleteTask(id?: number) {
     await supabase.from("Task").delete().eq("id", id); //the id of row to delete
     getTasks();
   }
@@ -111,7 +121,7 @@ export default function Home() {
 
                     <textarea
                       className="form-textarea mt-1 block shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      rows="3"
+                      rows={3}
                       placeholder="Task Activity"
                       value={Activity.toString()}
                       onChange={(e) =>
@@ -193,19 +203,19 @@ export default function Home() {
                     </th>
                   </tr>
                   {task &&
-                    tasks.map((task, index) => (
-                      <tr key={task.id}>
+                    tasks.map((item, index) => (
+                      <tr key={item.id}>
                         <td className="border px-4 py-4">{index + 1}</td>
-                        <td className="border px-4 py-4">{task.Name}</td>
-                        <td className="border px-8 py-4">{task.Activity}</td>
-                        <td className="border px-8 py-4">{task.StartDate}</td>
-                        <td className="border px-8 py-4">{task.EndDate}</td>
+                        <td className="border px-4 py-4">{item.Name}</td>
+                        <td className="border px-8 py-4">{item.Activity}</td>
+                        <td className="border px-8 py-4">{item.StartDate}</td>
+                        <td className="border px-8 py-4">{item.EndDate}</td>
                         <td className="border px-8 py-4">
                           {" "}
                           <button
                             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             type="button"
-                            onClick={() => deleteTask(task.id)}
+                            onClick={() => deleteTask(item.id)}
                           >
                             Delete
                           </button>
