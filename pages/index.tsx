@@ -1,10 +1,11 @@
-// import Head from "next/head";
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import { supabase } from "../client";
 
 export default function Home() {
-   // Declare a new state variable to store task details
-   const [task, setTask] = useState({
+  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState([]);
+  const [task, setTask] = useState({
     Name: "",
     Activity: "",
     StartDate: "",
@@ -12,11 +13,9 @@ export default function Home() {
   });
 
   const { Name, Activity, StartDate, EndDate } = task;
-
-  // Create a function that handles the new task creation
   async function addTask() {
     await supabase
-      .from("Task") // Select the Table
+      .from("Task")
       .insert([
         {
           Name,
@@ -24,23 +23,60 @@ export default function Home() {
           StartDate,
           EndDate,
         },
-      ]) // Insert the new task
+      ])
       .single();
     setTask({
       Name: "",
       Activity: "",
       StartDate: "",
       EndDate: "",
-    }); // Reset the task details
+    });
+    getTasks();
   }
+
+  async function getTasks() {
+    const { data } = await supabase.from("Task").select();
+    setTasks(data);
+    setLoading(false);
+  }
+
+
+  async function deleteTask(id) {
+    await supabase.from("Task").delete().eq("id", id); //the id of row to delete
+    getTasks();
+  }
+
+  useEffect(() => {
+    getTasks();
+  }, []);
+
+  // If Loading
+  if (loading)
+    return (
+      <div className="flex justify-center items-center">
+        <div
+          className="
+      animate-spin
+      rounded-full
+      h-32
+      w-32
+      border-t-2 border-b-2 border-blue-500 mt-36
+    "
+        ></div>
+      </div>
+    );
   return (
     <div className="flex flex-col items-center justify-center py-2">
       <div>
-       // ...
+        <Head>
+          <title>Supabase and NextJs Demo</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+
         <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
           <h1 className="text-4xl font-bold mt-20">
             <a className="text-blue-600" href="/">
-              Full Stack Application With Tailwind CSS and Supabase in NextJs
+              Daily Tasks
             </a>
           </h1>
 
@@ -99,6 +135,7 @@ export default function Home() {
                       onChange={(e) =>
                         setTask({ ...task, StartDate: e.target.value })
                       }
+                      
                     />
                   </div>
                   <div className="mb-4">
@@ -122,7 +159,7 @@ export default function Home() {
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                       type="button"
-                      onClick={addTask} // Call the addTask Function
+                      onClick={addTask}
                     >
                       Add Task
                     </button>
@@ -132,7 +169,51 @@ export default function Home() {
             </div>
 
             <div className="p-2 mt-6 w-96 rounded-xl focus:text-blue-600">
-              // ...
+              <table className="shadow-lg bg-white">
+                <tbody>
+                  <tr>
+                    <th className="bg-blue-400 border text-left px-4 py-4">
+                      S/N
+                    </th>
+                    <th className="bg-blue-400 border text-left px-8 py-4">
+                      Name
+                    </th>
+                    <th className="bg-blue-400 border text-left px-8 py-4">
+                      Activity
+                    </th>
+                    <th className="bg-blue-400 border text-left px-14 py-4">
+                      Start Date
+                    </th>
+                    <th className="bg-blue-400 border text-left px-16 py-4">
+                      End Date
+                    </th>
+
+                    <th className="bg-blue-400 border text-left px-4 py-4">
+                      Action
+                    </th>
+                  </tr>
+                  {task &&
+                    tasks.map((task, index) => (
+                      <tr key={task.id}>
+                        <td className="border px-4 py-4">{index + 1}</td>
+                        <td className="border px-4 py-4">{task.Name}</td>
+                        <td className="border px-8 py-4">{task.Activity}</td>
+                        <td className="border px-8 py-4">{task.StartDate}</td>
+                        <td className="border px-8 py-4">{task.EndDate}</td>
+                        <td className="border px-8 py-4">
+                          {" "}
+                          <button
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            type="button"
+                            onClick={() => deleteTask(task.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </main>
